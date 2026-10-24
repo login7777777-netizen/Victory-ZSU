@@ -84,12 +84,20 @@ body.touch #mute{bottom:auto;top:10px;right:auto;left:50%;transform:translateX(-
 #scoreBox{display:flex;align-items:baseline;gap:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
 #scoreV{font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink);margin-left:auto;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 #comboV{color:var(--flag-y);font-style:normal;min-width:3.2em;text-align:right}
+h1.bad{color:#e4121c;text-shadow:0 0 18px rgba(228,18,28,.45),0 2px 0 #7a0a10}
+body.fin #vitals,body.fin #kit,body.fin #det,body.fin #route{opacity:0;transition:opacity 1s}
+body.fin #touch{display:none}
+h1.good{color:var(--flag-y)}
+#timerBox{display:flex;align-items:baseline;gap:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#tmrV{margin-left:auto;font-family:var(--display);font-weight:400;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ok)}
+h1.late{color:var(--amber)}
 </style>
 <div id="stage">
 <canvas id="c"></canvas>
 <div id="hud">
  <div id="vitals" class="panel">
   <div id="scoreBox"><span data-i="score"></span><b id="scoreV">0</b><em id="comboV"></em></div>
+  <div id="timerBox"><span id="tmrL"></span><b id="tmrV"></b></div>
   <div class="bar" id="bHp"><span><span data-i="hp"></span><em id="vHp">100</em></span><i><b></b></i></div>
   <div class="bar" id="bSt"><span data-i="st"></span><i><b></b></i></div>
   <div class="chip" id="cover" hidden></div>
@@ -144,11 +152,11 @@ const I18N={
 uk:{aria:"Ігрове поле",hp:"Здоров’я",st:"Сили",fd:"Ситість",b0:"Лісосмуга",b1:"Поле. Міни",b2:"Зруйноване село",b3:"Місто",m:"м",
 reserve:"запас {n}",kheal:"аптечки {n}",kfood:"їжа {n}",sig:"Сигнал",quiet:"Тихо",north:"П",home:"СВОЇ",
 sound:"звук",on:"увімк",off:"вимк",bFire:"ВОГОНЬ",bRun:"БІГ",bHeal:"АПТ",bEat:"ЇЖА",bRel:"ЗАР.",
-go:"Північ, до своїх. Передати координати",story:"Вашу позицію накрили. Зв’язку немає, побратими поранені або загинули. Ви єдиний, хто бачив, де ворожі розрахунки запускають дрони. Якщо дійти до своїх і передати координати, їх накриє артилерія, і ці дрони більше не злетять.",half:"Половина шляху. Ще 1500 м",near:"Лишилось 500 м. Свої близько",won2:"Координати передано. Артилерія працює по розрахунках дронів.",lost:"Координати не передано.",noHeal:"Аптечок немає",hpFull:"Здоров’я в нормі",noFood:"Їжі немає",notHungry:"Не голодний",noAmmo:"Патрони скінчилися",
+go:"Північ, до своїх. Передати координати ворожих операторів",story:"Вашу позицію накрили. У рації сіла батарейка: ні передати, ні почути нікого. Побратими поранені або загинули. Ви єдиний, хто бачив, де засіли ворожі оператори FPV, які полюють на ваших. Це їхні точні координати, і передати їх можна лише особисто, тому доводиться йти пішки. Якщо дійти до своїх, артилерія накриє операторів, і ці дрони більше не злетять. Оператори вже збираються змінити позицію: у вас близько шести хвилин.",half:"Половина шляху. Ще 1500 м",near:"Лишилось 500 м. Свої близько",won2:"Координати ворожих операторів передано. Артилерія працює по ворожих розрахунках.",lost:"Координати ворожих операторів не передані.",noHeal:"Аптечок немає",hpFull:"Здоров’я в нормі",noFood:"Їжі немає",notHungry:"Не голодний",noAmmo:"Патрони скінчилися",
 ammoPlus:"Патрони +{n}",healPlus:"Аптечка +1",healAuto:"Аптечка підібрана й одразу використана",rationPlus:"Пайок +1",
 cFpv:"FPV-дрон",cShrap:"уламки дрона",cMine:"міна",cHunger:"голод",
 sDist:"пройдено",sKills:"дронів збито",sShots:"пострілів",sTime:"у дорозі",sBest:"рекорд відстані",
-title:"Дорога до своїх",score:"Очки",pkill:"Дрон збито",pwait:"Ждуна збито",pdodge:"Ухилення",phide:"Дрон загубив вас",pmine:"Міну підірвано",ppick:"Припаси",sScore:"очки",sBestScore:"рекорд очок",bonus:"Бонус за прохід: +{n}.",bestLine:"Рекорд: {n} очок",tday:"День",tdusk:"Сутінки",tnight:"Ніч",tdawn:"Світанок",tmday:"Настав день",tmdusk:"Смеркає",tmnight:"Настала ніч",tmdawn:"Світає",hide:"Під деревом: сховались",ssummer:"Літо",sautumn:"Осінь",swinter:"Зима",wclear:"Ясно",wrain:"Дощ",wstorm:"Гроза",wfog:"Туман",wsnow:"Сніг",wblizzard:"Завірюха",wmclear:"Розвиднюється",wmrain:"Починається дощ",wmstorm:"Насувається гроза",wmfog:"Спускається туман",wmsnow:"Починається сніг",wmblizzard:"Здіймається завірюха",heroAlt:"Український військовий у касці та бронежилеті на тлі синьо-жовтого прапора",
+title:"Дорога до своїх",score:"Очки",pkill:"Дрон збито",pwait:"Ждуна збито",pdodge:"Ухилення",phide:"Дрон загубив вас",pmine:"Міну підірвано",ppick:"Припаси",sScore:"очки",sBestScore:"рекорд очок",bonus:"Бонус за прохід: +{n}.",bestLine:"Рекорд: {n} очок",fin1:"Свої!",fin2:"Координати ворожих операторів передано",fin3:"Артилерія накриває операторів дронів",fin4:"Слава Україні!",rad:"Думка",shout:"Свої гукають",r1:"Рація мертва. Лишається тільки йти пішки на північ",r2:"Поле заміноване. Дивись під ноги",r3:"Село. Ждуни на дахах і в траві",r4:"Місто. Свої вже близько. Ще трохи",r5:"Тримайся. Ти мусиш дійти",r6:"Тримайся, брате, ми тебе бачимо!",tmr1:"Вікно удару",tmr2:"Оператори відходять",tmr3:"Оператори пішли",tw1:"Вікно удару закривається. Оператори збираються змінити позицію",tw2:"Оператори залишили позиції",wonA:"Дійшли до своїх",wonB:"Дійшли майже вчасно",wonC:"Дійшли, але запізно",endA:"Координати ворожих операторів передано вчасно. Артилерія накрила їхні позиції, ці дрони більше не злетять.",endB:"Координати передано майже вчасно. Артилерія накрила позиції, але частина операторів встигла піти.",endC:"Координати передано запізно. Оператори вже змінили позицію, артилерія вдарила по порожніх окопах.",fin3b:"Артилерія б’є по позиціях. Частина операторів встигла піти",fin3c:"Артилерія б’є по порожніх позиціях. Оператори вже пішли",fin4c:"Ми живі. Наступного разу будемо швидше",tday:"День",tdusk:"Сутінки",tnight:"Ніч",tdawn:"Світанок",tmday:"Настав день",tmdusk:"Смеркає",tmnight:"Настала ніч",tmdawn:"Світає",hide:"Під деревом: сховались",ssummer:"Літо",sautumn:"Осінь",swinter:"Зима",wclear:"Ясно",wrain:"Дощ",wstorm:"Гроза",wfog:"Туман",wsnow:"Сніг",wblizzard:"Завірюха",wmclear:"Розвиднюється",wmrain:"Починається дощ",wmstorm:"Насувається гроза",wmfog:"Спускається туман",wmsnow:"Починається сніг",wmblizzard:"Здіймається завірюха",heroAlt:"Український військовий у касці та бронежилеті на тлі синьо-жовтого прапора",
 intro:"Ви військовий ЗСУ. Три кілометри пішки на північ: лісосмуга, поле, зруйноване село, місто. Над головою FPV-дрони. Частина з них ждуни: вони лежать на землі й чекають, поки ви підійдете. У землі міни. Детектор попереджає про наближення лише іноді, а патронів, аптечок і їжі мало.",
 kbL:"Клавіатура",kb1:"WASD або стрілки: біг. Миша: приціл. ЛКМ або Пробіл: постріл. Shift: спринт",kb2:"R: перезарядка. Q: аптечка. E: їжа. P: пауза. M: звук",
 padL:"Геймпад Xbox",pad:"Лівий стік: біг. Правий стік: приціл. RT: постріл. LT: спринт. X: перезарядка. Y: аптечка. B: їжа. Start: пауза",
@@ -160,11 +168,11 @@ pause:"Пауза",pausep:"Дрони чекають. Натисніть P аб�
 en:{aria:"Game field",hp:"Health",st:"Stamina",fd:"Food",b0:"Tree line",b1:"Open field. Mines",b2:"Ruined village",b3:"City",m:"m",
 reserve:"spare {n}",kheal:"medkits {n}",kfood:"food {n}",sig:"Signal",quiet:"Quiet",north:"N",home:"HOME",
 sound:"sound",on:"on",off:"off",bFire:"FIRE",bRun:"RUN",bHeal:"MED",bEat:"FOOD",bRel:"LOAD",
-go:"North, to our lines. Deliver the coordinates",story:"Your position has been hit. The radio is dead and your comrades are wounded or gone. You are the only one who saw where the enemy crews launch their drones. If you reach our lines and pass on the coordinates, artillery will take them out and those drones will stop flying.",half:"Halfway there. 1500 m to go",near:"500 m left. Our lines are close",won2:"Coordinates delivered. Artillery is working on the drone crews.",lost:"The coordinates never got through.",noHeal:"No medkits",hpFull:"Health is fine",noFood:"No food",notHungry:"Not hungry",noAmmo:"Out of shells",
+go:"North, to our lines. Deliver the enemy operators' coordinates",story:"Your position has been hit. The radio battery is dead: you can neither call nor hear anyone. Your comrades are wounded or gone. You are the only one who saw where the enemy FPV operators are dug in, the ones hunting your people. You have their exact coordinates, and the only way to deliver them is in person, so you have to go on foot. If you reach our lines, artillery will hit the operators and those drones will stop flying. The operators are about to relocate: you have roughly six minutes.",half:"Halfway there. 1500 m to go",near:"500 m left. Our lines are close",won2:"The enemy operators' coordinates are delivered. Artillery is hitting the enemy crews.",lost:"The enemy operators' coordinates were not delivered.",noHeal:"No medkits",hpFull:"Health is fine",noFood:"No food",notHungry:"Not hungry",noAmmo:"Out of shells",
 ammoPlus:"Shells +{n}",healPlus:"Medkit +1",healAuto:"Medkit picked up and used right away",rationPlus:"Ration +1",
 cFpv:"an FPV drone",cShrap:"drone shrapnel",cMine:"a mine",cHunger:"hunger",
 sDist:"covered",sKills:"drones shot",sShots:"shots fired",sTime:"on the road",sBest:"best distance",
-title:"Road Home",score:"Score",pkill:"Drone down",pwait:"Waiter down",pdodge:"Dodge",phide:"Drone lost you",pmine:"Mine detonated",ppick:"Supplies",sScore:"score",sBestScore:"best score",bonus:"Finish bonus: +{n}.",bestLine:"Best: {n} points",tday:"Day",tdusk:"Dusk",tnight:"Night",tdawn:"Dawn",tmday:"Daylight",tmdusk:"Dusk is falling",tmnight:"Night has fallen",tmdawn:"Dawn is breaking",hide:"Under a tree: hidden",ssummer:"Summer",sautumn:"Autumn",swinter:"Winter",wclear:"Clear",wrain:"Rain",wstorm:"Thunderstorm",wfog:"Fog",wsnow:"Snow",wblizzard:"Blizzard",wmclear:"The sky is clearing",wmrain:"Rain is starting",wmstorm:"A thunderstorm is rolling in",wmfog:"Fog is settling in",wmsnow:"It starts to snow",wmblizzard:"A blizzard is rising",heroAlt:"Ukrainian soldier in a helmet and body armour in front of the blue and yellow flag",
+title:"Road Home",score:"Score",pkill:"Drone down",pwait:"Waiter down",pdodge:"Dodge",phide:"Drone lost you",pmine:"Mine detonated",ppick:"Supplies",sScore:"score",sBestScore:"best score",bonus:"Finish bonus: +{n}.",bestLine:"Best: {n} points",fin1:"Our guys!",fin2:"The enemy operators' coordinates are delivered",fin3:"Artillery is hitting the drone operators",fin4:"Glory to Ukraine!",rad:"Thought",shout:"Voices from our lines",r1:"The radio is dead. All that is left is to walk north",r2:"The field is mined. Watch your step",r3:"A village. Waiters on the roofs and in the grass",r4:"The city. Our lines are close. A little more",r5:"Hold on. You have to make it",r6:"Hold on, brother, we can see you!",tmr1:"Strike window",tmr2:"Operators leaving",tmr3:"Operators gone",tw1:"The strike window is closing. The operators are preparing to relocate",tw2:"The operators have left their positions",wonA:"Made it home",wonB:"Made it, almost in time",wonC:"Made it, but too late",endA:"The enemy operators' coordinates were delivered in time. Artillery hit their positions and those drones will not fly again.",endB:"The coordinates were delivered almost in time. Artillery hit the positions, but part of the operators got away.",endC:"The coordinates came too late. The operators had already moved and artillery hit empty trenches.",fin3b:"Artillery is hitting the positions. Some operators got away",fin3c:"Artillery is hitting empty positions. The operators are gone",fin4c:"We are alive. Faster next time",tday:"Day",tdusk:"Dusk",tnight:"Night",tdawn:"Dawn",tmday:"Daylight",tmdusk:"Dusk is falling",tmnight:"Night has fallen",tmdawn:"Dawn is breaking",hide:"Under a tree: hidden",ssummer:"Summer",sautumn:"Autumn",swinter:"Winter",wclear:"Clear",wrain:"Rain",wstorm:"Thunderstorm",wfog:"Fog",wsnow:"Snow",wblizzard:"Blizzard",wmclear:"The sky is clearing",wmrain:"Rain is starting",wmstorm:"A thunderstorm is rolling in",wmfog:"Fog is settling in",wmsnow:"It starts to snow",wmblizzard:"A blizzard is rising",heroAlt:"Ukrainian soldier in a helmet and body armour in front of the blue and yellow flag",
 intro:"You are a Ukrainian soldier. Three kilometres on foot, heading north: tree line, open field, ruined village, city. FPV drones overhead. Some of them are waiters (\"zhduns\"): they lie on the ground and wait for you to come close. The ground is mined. The detector warns you only some of the time, and shells, medkits and food are scarce.",
 kbL:"Keyboard",kb1:"WASD or arrows: run. Mouse: aim. Left click or Space: fire. Shift: sprint",kb2:"R: reload. Q: medkit. E: eat. P: pause. M: sound",
 padL:"Xbox pad",pad:"Left stick: run. Right stick: aim. RT: fire. LT: sprint. X: reload. Y: medkit. B: eat. Start: pause",
@@ -233,6 +241,10 @@ const SFX={
   eat(){noise(.07,3000,.3,'bandpass',2);noise(.07,3000,.3,'bandpass',2,.12);noise(.07,3000,.3,'bandpass',2,.24)},
   click(){tone(240,.06,.3,'square');tone(180,.08,.3,'square',null,.1)},
   thunder(){noise(2.4,320,1.2,'lowpass',.7);tone(48,1.5,.5,'sine',24)},
+  fw(){noise(.5,3500,.22,'highpass',1);tone(900,.25,.07,'sine',220)},
+  fanfare(){[[262,0],[330,.18],[392,.36],[523,.6]].forEach(n=>tone(n[0],.55,.2,'triangle',null,n[1]));[392,523,659].forEach(f=>tone(f,1.8,.1,'sine',null,.95))},
+  radio(){noise(.12,3000,.16,'bandpass',2);tone(1200,.05,.05,'square',null,.13)},
+  spinup(){tone(140,.7,.12,'sawtooth',950);noise(.7,2500,.12,'bandpass',1.5)},
   alert(){tone(1900,.05,.18,'square');tone(1900,.05,.18,'square',null,.09)}
 };
 function setMute(m){muted=m;if(master)master.gain.value=m?0:.8;$('mute').textContent=muteTxt();try{localStorage.setItem('dkm_mute',m?'1':'0')}catch(e){}}
@@ -248,7 +260,7 @@ addEventListener('keydown',e=>{
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(k))e.preventDefault();
   if(k==='KeyP'||k==='Escape')togglePause();
   if(k==='KeyM')setMute(!muted);
-  if((k==='Enter'||k==='Space')&&G.state!=='play'&&G.state!=='pause')startGame();
+  if((k==='Enter'||k==='Space')&&G.state!=='play'&&G.state!=='pause'&&G.state!=='finale')startGame();
   if(!e.repeat){if(k==='KeyQ')useHeal();if(k==='KeyE'||k==='KeyF')useFood();if(k==='KeyR')startReload()}
 });
 addEventListener('keyup',e=>{keys[e.code]=false});
@@ -296,8 +308,8 @@ function pollPad(){
   if(now.r&&!GP.prev.r)startReload();
   if(now.h&&!GP.prev.h)useHeal();
   if(now.e&&!GP.prev.e)useFood();
-  if(now.s&&!GP.prev.s){if(G.state==='play'||G.state==='pause')togglePause();else startGame()}
-  if(now.a&&!GP.prev.a&&G.state!=='play'&&G.state!=='pause')startGame();
+  if(now.s&&!GP.prev.s){if(G.state==='play'||G.state==='pause')togglePause();else if(G.state!=='finale')startGame()}
+  if(now.a&&!GP.prev.a&&G.state!=='play'&&G.state!=='pause'&&G.state!=='finale')startGame();
   GP.prev=now;
 }
 function rumble(d,w,s){try{const g=navigator.getGamepads()[0]||[...navigator.getGamepads()].find(x=>x);if(g&&g.vibrationActuator&&g.vibrationActuator.playEffect)g.vibrationActuator.playEffect('dual-rumble',{duration:d,weakMagnitude:w,strongMagnitude:s})}catch(e){}}
@@ -395,7 +407,7 @@ function newGame(){
   P={x:W/2,y:0,vx:0,vy:0,hp:100,st:100,stLock:false,food:100,tube:5,reserve:10,heal:1,eat:2,
      fireCd:0,reloadT:0,reloading:false,stun:0,healLeft:0,step:0,face:-Math.PI/2,hurt:0,recoil:0,sprinting:false};
   drones=[];pellets=[];parts=[];booms=[];scorch=[];
-  G.m1=0;G.m2=0;G.score=0;G.combo=0;G.comboT=0;G.dm=0;G.bonus=0;popups=[];G.time=0;G.kills=0;G.shots=0;G.mines=0;G.spawnT=9;G.ghostT=rr2(10,18);G.beepT=0;G.cause='';
+  G.m1=0;G.m2=0;G.tw=0;G.rad={};G.radQ=[{t:7,key:'r1'}];G.score=0;G.combo=0;G.comboT=0;G.dm=0;G.bonus=0;popups=[];G.time=0;G.kills=0;G.shots=0;G.mines=0;G.spawnT=9;G.ghostT=rr2(10,18);G.beepT=0;G.cause='';
   DET={on:false,ang:0,dist:0,ghost:null};
   lastBiome=-1;shake=0;flashA=0;aimAng=-Math.PI/2;
   SEASON=['summer','autumn','winter'][Math.floor(rr()*3)];initWeather();
@@ -414,15 +426,14 @@ function die(why){
   setTimeout(()=>{if(G.state==='dead')renderCard('dead')},900);
 }
 function win(){
-  G.state='win';const bn=Math.round(P.hp*5+(P.tube+P.reserve)*10+P.eat*20+P.heal*30+Math.max(0,360-G.time)*4);G.bonus=bn;G.score+=bn;saveScore();const m=GOAL;G.best=Math.max(G.best,m);try{localStorage.setItem('dkm_best',String(G.best))}catch(e){}
-  setTimeout(()=>{if(G.state==='win')renderCard('win')},600);
+  G.end=G.time<=360?'A':G.time<=540?'B':'C';G.state='finale';initFinale();const bn=({A:1500,B:500,C:0}[G.end])+Math.round(P.hp*5+(P.tube+P.reserve)*10+P.eat*20+P.heal*30+Math.max(0,360-G.time)*4);G.bonus=bn;G.score+=bn;saveScore();const m=GOAL;G.best=Math.max(G.best,m);try{localStorage.setItem('dkm_best',String(G.best))}catch(e){}
 }
-function boom(x,y,r,big){
+function boom(x,y,r,big,vol){
   booms.push({x,y,r,t:0,dur:big?.7:.45,big});
   addParts(x,y,big?26:14,big?'#f0a43a':'#d8c070',big?220:150,.6,big?3:2);
   addParts(x,y,big?14:6,'#3a3a34',big?120:80,1,4);
   scorch.push({x,y,r:r*.55});if(scorch.length>40)scorch.shift();
-  if(big)SFX.boom(1);else SFX.pop();
+  if(big)SFX.boom(vol||1);else SFX.pop();
 }
 function useHeal(){
   if(G.state!=='play')return;
@@ -458,7 +469,7 @@ function spawnFpv(){
   drones.push({x,y,a:Math.atan2(P.y-y,P.x-x),spd:vmax,vmax,acc:500,turn:lerp(1.45,2.0,t)*rr2(.9,1.1),hp:2,age:0,life:17,det:rr()<.55+.25*WX.fog+.1*TD.d,type:'fpv',ph:rr()*6,beep:0});
 }
 function launchWaiter(w){
-  w.state='gone';
+  w.state='gone';SFX.spinup();
   drones.push({x:w.x,y:w.y,a:Math.atan2(P.y-w.y,P.x-w.x),spd:40,vmax:lerp(200,235,clamp(meters()/2600,0,1)),acc:420,turn:2.05,hp:2,age:0,life:15,det:false,type:'waiter',ph:rr()*6,beep:0});
 }
 function explodeDrone(d){
@@ -541,6 +552,8 @@ function update(dt){
   if(P.healLeft>0){const h=Math.min(P.healLeft,15*dt);P.healLeft-=h;P.hp=Math.min(100,P.hp+h)}
   if(P.hurt>0)P.hurt-=dt;
   if(P.exposed>0)P.exposed-=dt;
+  if(G.time>=360&&G.tw<1){G.tw=1;showMsg(tr('tw1'),3.4)}
+  if(G.time>=540&&G.tw<2){G.tw=2;showMsg(tr('tw2'),3.4)}
   G.tod=(G.tod+dt/700)%1;computeTOD();
   if(TD.label!==G.todL){G.todL=TD.label;showMsg(tr('tm'+TD.label),2.4);updBiomeText()}
   if(flashA>0)flashA=Math.max(0,flashA-dt*1.6);
@@ -609,16 +622,16 @@ function update(dt){
   }
   pellets=pellets.filter(p=>p.life>0);
   drones=drones.filter(d=>!d.dead);
-  for(const q of parts){q.life-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.94;q.vy*=.94}
-  parts=parts.filter(q=>q.life>0);
+  stepParts(dt);
   for(const b of booms)b.t+=dt;
   booms=booms.filter(b=>b.t<b.dur);
   updateWeather(dt);
+  radioStep(dt);
   /* detector */
   updateDetector(dt);
   /* biome + win */
   const bi=biomeAt(m);
-  if(bi!==lastBiome){lastBiome=bi;showMsg(m<5?tr('go'):bname(bi),2.4);updBiomeText()}
+  if(bi!==lastBiome){lastBiome=bi;showMsg(m<5?tr('go'):bname(bi),2.4);if(m>=5)G.radQ.push({t:3.2,key:'r'+(bi+1)});updBiomeText()}
   const m10=Math.floor(m/10);while(G.dm<m10){G.dm++;G.score+=10}
   if(G.combo>0){G.comboT-=dt;if(G.comboT<=0)G.combo=0}
   for(const q of popups){q.t+=dt;q.y-=26*dt}popups=popups.filter(q=>q.t<1.6);
@@ -640,15 +653,50 @@ function updateDetector(dt){
     G.beepT-=dt;if(G.beepT<=0){G.beepT=clamp(best.dist/best.range*.85+.1,.1,.85);SFX.beep(1100+(1-best.dist/best.range)*900)}}
   else{DET.on=false;G.beepT=0}
 }
+const VOICES=new Map(),MOT=[1,1.013,.988,1.021];
+function makeVoice(){
+  const o=[],mix=AC.createGain();mix.gain.value=.16;
+  for(let i=0;i<4;i++){const s=AC.createOscillator();s.type=i%2?'sawtooth':'square';s.frequency.value=420*MOT[i];s.start();s.connect(mix);o.push(s)}
+  const ns=AC.createBufferSource();ns.buffer=noiseBuf;ns.loop=true;
+  const nf=AC.createBiquadFilter();nf.type='bandpass';nf.frequency.value=2200;nf.Q.value=1.2;
+  const ng=AC.createGain();ng.gain.value=.3;ns.connect(nf);nf.connect(ng);ns.start(0,Math.random());
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1200;lp.Q.value=.7;
+  const vg=AC.createGain();vg.gain.value=0;
+  mix.connect(lp);ng.connect(lp);lp.connect(vg);
+  let pan=null;if(AC.createStereoPanner){pan=AC.createStereoPanner();vg.connect(pan);pan.connect(master)}else vg.connect(master);
+  return {o,ns,nf,ng,lp,vg,pan,jit:0};
+}
+function killVoice(v){
+  const t=AC.currentTime;v.vg.gain.cancelScheduledValues(t);v.vg.gain.setTargetAtTime(0,t,.04);
+  setTimeout(()=>{try{v.o.forEach(x=>x.stop());v.ns.stop();v.vg.disconnect();if(v.pan)v.pan.disconnect()}catch(e){}},500);
+}
 function updateBuzz(){
-  if(!AC||!buzzG)return;
-  let dm=1e9,px=0;
-  for(const d of drones){const dd=Math.hypot(d.x-P.x,d.y-P.y);if(dd<dm){dm=dd;px=(d.x-P.x)}}
-  const v=G.state==='play'?Math.pow(clamp(1-dm/420,0,1),1.4)*.11*(1-.5*WX.rain):0,t=AC.currentTime;
-  if(ambG){ambG.gain.setTargetAtTime(G.state==='play'?WX.rain*.16+WX.snow*.025+WX.wind*.05:0,t,.3);ambF.frequency.setTargetAtTime(WX.rain>.05?2200:600,t,.5)}
-  buzzG.gain.setTargetAtTime(v,t,.05);
-  const f=250+clamp(1-dm/420,0,1)*260;buzzA.frequency.setTargetAtTime(f,t,.05);buzzB.frequency.setTargetAtTime(f*1.51,t,.05);
-  if(buzzP)buzzP.pan.setTargetAtTime(clamp(px/220,-1,1),t,.05);
+  if(!AC||!master)return;
+  const t=AC.currentTime,play=G.state==='play';
+  if(ambG){ambG.gain.setTargetAtTime(play?WX.rain*.16+WX.snow*.025+WX.wind*.05:0,t,.3);ambF.frequency.setTargetAtTime(WX.rain>.05?2200:600,t,.5)}
+  const list=[];
+  if(play)for(const d of drones)list.push({d,dist:Math.hypot(d.x-P.x,d.y-P.y)});
+  list.sort((a,b)=>a.dist-b.dist);
+  const act=new Set();
+  for(let i=0;i<Math.min(4,list.length);i++){
+    const d=list[i].d,dist=list[i].dist;act.add(d);
+    let v=VOICES.get(d);if(!v){v=makeVoice();VOICES.set(d,v)}
+    if(dist>640){v.vg.gain.setTargetAtTime(0,t,.1);continue}
+    const near=clamp(1-dist/540,0,1);
+    const vr=((d.x-P.x)*Math.cos(d.a)+(d.y-P.y)*Math.sin(d.a))/Math.max(dist,1)*d.spd;
+    const dop=1100/(1100+vr);
+    v.jit+=(rr()-.5)*.1;v.jit*=.95;
+    const dive=d.mode==='hunt'?Math.pow(clamp((2.2-dist/Math.max(d.spd,1))/2.2,0,1),1.4):0;
+    const f0=((d.mode==='search'?300:380)+d.spd*.55)*(1+v.jit*.05)*dop*(1+.5*dive);
+    for(let k=0;k<4;k++)v.o[k].frequency.setTargetAtTime(f0*(1+(MOT[k]-1)*(1+3*dive)),t,.03);
+    const vol=Math.pow(near,1.5)*.2*(1+clamp((170-dist)/170,0,1)*.9)*(1-.5*WX.rain)*(1+.15*TD.d)*(d.mode==='search'?.8:1)*(1+.35*dive);
+    v.vg.gain.setTargetAtTime(vol,t,.05);
+    v.lp.frequency.setTargetAtTime(lerp(650,7500,Math.pow(near,1.3))*(1-.35*WX.rain)*(1+.5*dive),t,.06);
+    v.ng.gain.setTargetAtTime(.25+near*.5+.5*dive,t,.1);
+    v.nf.frequency.setTargetAtTime(1800+d.spd*5,t,.1);
+    if(v.pan)v.pan.pan.setTargetAtTime(clamp((d.x-P.x)/180,-1,1),t,.05);
+  }
+  for(const e of VOICES){if(!act.has(e[0])){killVoice(e[1]);VOICES.delete(e[0])}}
 }
 
 /* ---------- weather ---------- */
@@ -702,6 +750,64 @@ function addScore(base,key,x,y,flat){
   popups.push({x,y,t:0,text:'+'+pts+' '+tr(key)+(!flat&&mult>1.01?' \u00d7'+mult.toFixed(1):'')});
 }
 function saveScore(){if(G.score>G.bs){G.bs=G.score;try{localStorage.setItem('dkm_bs',String(G.bs))}catch(e){}}}
+
+/* ---------- finale ---------- */
+function stepParts(dt){
+  const damp=Math.pow(.94,dt*60);
+  for(const q of parts){q.life-=dt;q.vy+=(q.g||0)*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=damp;q.vy*=damp}
+  parts=parts.filter(q=>q.life>0);
+}
+function firework(x,y){
+  const cols=['#4a8cff','#ffd23a','#ffffff'],c1=cols[Math.floor(rr()*2)],c2=cols[rr()<.5?2:Math.floor(rr()*2)];
+  const n=48,sp=rr2(70,130);
+  for(let i=0;i<n;i++){const a=i/n*TAU,v=sp*(i%2?1:.62);parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rr2(1.1,1.6),max:1.6,c:i%2?c1:c2,s:2.8,g:60,add:true})}
+  booms.push({x,y,r:34,t:0,dur:.35,big:false,fw:true});SFX.fw();
+}
+function initFinale(){
+  G.fT=0;G.fMsg=0;G.fw=0;G.art=0;
+  for(const d of drones)boom(d.x,d.y,22,false);
+  drones=[];pellets=[];
+  Wst.prev=Wst.cur;Wst.cur='clear';Wst.mix=0;Wst.flash=0;
+  G.TD0={d:TD.d,warm:TD.warm};
+  P.vx=P.vy=0;P.cover=0;
+  G.friends=[];
+  for(let i=0;i<6;i++){const s=i<3?-1:1,k=i%3;G.friends.push({x:W/2-60+i*24+rr2(-8,8),y:GOAL_Y-90-rr2(0,30),tx:W/2+s*(34+k*28),ty:GOAL_Y+4+(k%2)*12,delay:.7+i*.22,face:Math.PI/2,ph:rr()*6,run:false})}
+  document.body.classList.add('fin');SFX.fanfare();
+}
+function finaleStep(dt){
+  G.fT+=dt;const T=G.fT;
+  if(msgT>0){msgT-=dt;if(msgT<=0)$('msg').classList.remove('show')}
+  const seq=[[.3,'fin1'],[2.8,'fin2'],[5.4,G.end==='A'?'fin3':G.end==='B'?'fin3b':'fin3c'],[8.4,G.end==='C'?'fin4c':'fin4']];
+  while(G.fMsg<seq.length&&T>=seq[G.fMsg][0]){showMsg(tr(seq[G.fMsg][1]),2.6);G.fMsg++}
+  const dx=W/2-P.x,dy=GOAL_Y+10-P.y,dd=Math.hypot(dx,dy);
+  if(dd>2){const s=Math.min(dd/dt,62);P.vx=dx/dd*s;P.vy=dy/dd*s;P.x+=P.vx*dt;P.y+=P.vy*dt}else{P.vx=P.vy=0}
+  P.face+=angDiff(P.face,-Math.PI/2)*Math.min(1,dt*6);P.step+=Math.hypot(P.vx,P.vy)*dt*.11;P.recoil=0;
+  if(P.hurt>0)P.hurt-=dt;
+  for(const f of G.friends){
+    if(T<f.delay)continue;
+    const ex=f.tx-f.x,ey=f.ty-f.y,ed=Math.hypot(ex,ey);
+    if(ed>3){const s=Math.min(ed/dt,95);f.x+=ex/ed*s*dt;f.y+=ey/ed*s*dt;f.face=Math.atan2(ey,ex);f.run=true}
+    else{f.run=false;f.face+=angDiff(f.face,Math.atan2(P.y-f.y,P.x-f.x))*Math.min(1,dt*5)}
+  }
+  Wst.mix=Math.min(1,Wst.mix+dt/4);computeWX();
+  const k=clamp(T/4,0,1);TD.d=lerp(G.TD0.d,0,k);TD.warm=lerp(G.TD0.warm,.85,k);
+  if(T>3&&T<8.5){G.art-=dt;if(G.art<=0){G.art=({A:rr2(.45,.9),B:rr2(.9,1.5),C:rr2(1.7,2.5)}[G.end]);boom(rr2(40,W-40),GOAL_Y-rr2(95,190),rr2(34,52),true,.4);shake=Math.min(6,shake+2)}}
+  if(G.end!=='C'&&T>(G.end==='A'?5.5:6.5)){G.fw-=dt;if(G.fw<=0){G.fw=(T<10?rr2(.35,.7):rr2(.9,1.6))*(G.end==='B'?1.8:1);firework(rr2(60,W-60),P.y-rr2(130,250))}}
+  stepParts(dt);
+  for(const b of booms)b.t+=dt;booms=booms.filter(b=>b.t<b.dur);
+  shake*=Math.exp(-8*dt);if(flashA>0)flashA=Math.max(0,flashA-dt*1.6);
+  if(T>=11&&G.state==='finale'){G.state='win';renderCard('win')}
+}
+
+/* ---------- thoughts + shouts from our lines ---------- */
+function radio(k,shout){showMsg(tr(shout?'shout':'rad')+': \u00ab'+tr(k)+'\u00bb',3.4)}
+function radioStep(dt){
+  for(const q of G.radQ)q.t-=dt;
+  const due=G.radQ.filter(q=>q.t<=0);G.radQ=G.radQ.filter(q=>q.t>0);
+  if(due.length)radio(due[0].key);
+  if(P.hp<30&&P.hp>0&&!G.rad.low){G.rad.low=1;if(meters()>=2500){G.rad.near=1;radio('r6',true)}else radio('r5')}
+  if(meters()>=2650&&!G.rad.near){G.rad.near=1;radio('r6',true)}
+}
 
 /* ---------- rendering ---------- */
 function groundCol(m){
@@ -841,8 +947,9 @@ function render(t){
   if(GOAL_Y>y0-80&&GOAL_Y<y1+80){
     c.fillStyle='#2f2519';c.fillRect(0,GOAL_Y-26,W,34);
     for(let x=6;x<W;x+=22){c.fillStyle='#a8966a';c.beginPath();c.roundRect?c.roundRect(x,GOAL_Y-34,18,10,4):c.rect(x,GOAL_Y-34,18,10);c.fill();c.fillStyle='#8c7a52';c.fillRect(x+3,GOAL_Y-31,12,2)}
-    c.fillStyle='#2b2a26';c.fillRect(W/2-1,GOAL_Y-92,2,60);
-    c.fillStyle='#2f6fdb';c.fillRect(W/2+1,GOAL_Y-92,40,10);c.fillStyle='#f4cb1d';c.fillRect(W/2+1,GOAL_Y-82,40,10);
+    if(G.state==='finale'||G.state==='win')drawBigFlag(t);
+    else{c.fillStyle='#2b2a26';c.fillRect(W/2-1,GOAL_Y-92,2,60);
+    c.fillStyle='#2f6fdb';c.fillRect(W/2+1,GOAL_Y-92,40,10);c.fillStyle='#f4cb1d';c.fillRect(W/2+1,GOAL_Y-82,40,10)}
     c.fillStyle='#ebe6cf';c.font='16px "Russo One",Impact,sans-serif';c.textAlign='center';c.fillText(tr('home'),W/2-34,GOAL_Y-52);c.textAlign='start';
   }
   each(WD.mines,y0-20,y1,q=>drawMine(q,t));
@@ -852,6 +959,7 @@ function render(t){
     c.globalAlpha=w.state==='alert'?1:(d<190?1:.8);drawDrone({x:w.x,y:w.y,state:w.state,ph:0},t,true);c.globalAlpha=1;
     if(w.state==='alert'){c.strokeStyle='rgba(255,70,50,.8)';c.lineWidth=1.5;c.beginPath();c.arc(w.x,w.y,16+Math.sin(t*20)*3,0,TAU);c.stroke()}});
   for(let i=lo(WD.walls,y0-260);i<WD.walls.length&&WD.walls[i].y<=y1;i++)drawWall(WD.walls[i]);
+  if(G.friends&&(G.state==='finale'||G.state==='win'))for(const f of G.friends)if(G.fT>=f.delay)drawFriend(f,t);
   drawSoldier();
   each(WD.trees,y0-30,y1+30,q=>drawTree(q,-q.y/PX));
   for(const d of drones)drawDrone(d,t,false);
@@ -861,16 +969,50 @@ function render(t){
     const g=c.createRadialGradient(b.x,b.y,0,b.x,b.y,r);g.addColorStop(0,'rgba(255,240,190,'+(1-k)+')');g.addColorStop(.45,'rgba(255,150,50,'+(.8*(1-k))+')');g.addColorStop(1,'rgba(120,40,10,0)');
     c.fillStyle=g;c.beginPath();c.arc(b.x,b.y,r,0,TAU);c.fill();
     if(b.big){c.strokeStyle='rgba(255,235,200,'+(.6*(1-k))+')';c.lineWidth=2;c.beginPath();c.arc(b.x,b.y,r*1.12,0,TAU);c.stroke()}}
-  for(const q of parts){c.globalAlpha=clamp(q.life/q.max,0,1);c.fillStyle=q.c;c.fillRect(q.x,q.y,q.s,q.s)}
-  c.globalAlpha=1;
+  for(const q of parts){c.globalAlpha=clamp(q.life/q.max,0,1);c.globalCompositeOperation=q.add?'lighter':'source-over';c.fillStyle=q.c;c.fillRect(q.x,q.y,q.s,q.s)}
+  c.globalCompositeOperation='source-over';c.globalAlpha=1;
   drawNight(t);
   drawWeather(t);
   drawPopups();
+  if(G.state==='finale'||G.state==='win')drawFinaleFx(t);
   c.setTransform(1,0,0,1,0,0);
   const vg=c.createRadialGradient(cv.width/2,cv.height/2,Math.min(cv.width,cv.height)*.35,cv.width/2,cv.height/2,Math.max(cv.width,cv.height)*.75);
   vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.45)');c.fillStyle=vg;c.fillRect(0,0,cv.width,cv.height);
 }
 function glow(c,x,y,r,rgb,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+rgb+','+a+')');g.addColorStop(1,'rgba('+rgb+',0)');c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,TAU);c.fill()}
+function drawBigFlag(t){
+  const c=ctx,bx=W/2,top=GOAL_Y-146;
+  c.fillStyle='#2b2a26';c.fillRect(bx-1.5,top,3,122);c.fillStyle='#d9c27a';c.beginPath();c.arc(bx,top,3.2,0,TAU);c.fill();
+  const k=clamp(G.fT/2.5,0,1);
+  for(let i=0;i<12;i++){const x0=bx+1.5+i*7,off=Math.sin(t*4-i*.6)*(1+i*.5)*k,hh=24*(.4+.6*k);
+    c.fillStyle='#2f6fdb';c.fillRect(x0,top+3+off,7.6,hh);c.fillStyle='#f4cb1d';c.fillRect(x0,top+3+hh+off,7.6,hh);
+    c.fillStyle='rgba(0,0,0,'+(.08+.08*Math.sin(t*4-i*.6+1.2))+')';c.fillRect(x0,top+3+off,7.6,hh*2)}
+}
+function drawFriend(f,t){
+  const c=ctx,s=Math.sin(f.ph+t*11);
+  c.save();c.translate(f.x,f.y);
+  c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(2,3,9,7,0,0,TAU);c.fill();
+  c.rotate(f.face+Math.PI/2);
+  c.fillStyle='#262a1b';c.beginPath();c.ellipse(-3,2+(f.run?s*4:0),2.6,4,0,0,TAU);c.fill();c.beginPath();c.ellipse(3,2-(f.run?s*4:0),2.6,4,0,0,TAU);c.fill();
+  c.fillStyle='#4a5a2c';c.fillRect(-5,2,10,8);
+  c.fillStyle='#6a7a3c';c.beginPath();c.ellipse(0,0,7.5,5.5,0,0,TAU);c.fill();
+  c.fillStyle='#2f6fdb';c.fillRect(-9.3,-3,2.6,2.4);c.fillStyle='#f4cb1d';c.fillRect(-9.3,-.6,2.6,2.4);
+  if(!f.run){const hy=-10+Math.sin(t*9+f.ph)*3;c.strokeStyle='#5f6d34';c.lineWidth=3;c.lineCap='round';c.beginPath();c.moveTo(5,-1);c.lineTo(8,hy);c.stroke();c.fillStyle='#d2a47c';c.beginPath();c.arc(8,hy,2.6,0,TAU);c.fill()}
+  c.fillStyle='#55663a';c.beginPath();c.arc(0,-1,4.4,0,TAU);c.fill();c.strokeStyle='#2c3519';c.lineWidth=1;c.stroke();
+  c.restore();
+}
+function drawFinaleFx(t){
+  const c=ctx,w=cv.width,h=cv.height,k=clamp(G.fT/4,0,1)*({A:1,B:.75,C:.35}[G.end]||1);c.setTransform(1,0,0,1,0,0);
+  c.globalCompositeOperation='lighter';
+  const g=c.createRadialGradient(w/2,-h*.05,0,w/2,-h*.05,w*.75);g.addColorStop(0,'rgba(255,200,110,'+(.28*k)+')');g.addColorStop(1,'rgba(255,170,70,0)');
+  c.fillStyle=g;c.fillRect(0,0,w,h);
+  for(let i=0;i<9;i++){const a=Math.PI/2+(i-4)*.2+Math.sin(t*.3+i)*.04,wd=.06;
+    c.fillStyle='rgba(255,215,130,'+(.035*k)+')';c.beginPath();c.moveTo(w/2,-h*.05);c.lineTo(w/2+Math.cos(a-wd)*h*1.6,-h*.05+Math.sin(a-wd)*h*1.6);c.lineTo(w/2+Math.cos(a+wd)*h*1.6,-h*.05+Math.sin(a+wd)*h*1.6);c.fill()}
+  c.globalCompositeOperation='source-over';
+  if(G.fT>4){c.strokeStyle='rgba(25,25,20,.75)';c.lineWidth=2*dpr;c.lineCap='round';
+    for(let i=0;i<7;i++){const sp=(t*38+i*130)%(w/dpr+240)-120,x=sp*dpr,y=h*(.14+.06*(i%3))+Math.sin(t*1.6+i)*8*dpr,f=Math.sin(t*9+i*2)*5*dpr,s=(1+i%2*.3)*dpr;
+      c.beginPath();c.moveTo(x-9*s,y+f);c.quadraticCurveTo(x-4*s,y-3*s,x,y);c.quadraticCurveTo(x+4*s,y-3*s,x+9*s,y+f);c.stroke()}}
+}
 function drawPopups(){
   const c=ctx;c.setTransform(1,0,0,1,0,0);c.font='bold '+Math.round(12*dpr)+'px "IBM Plex Mono",monospace';c.textAlign='center';c.lineJoin='round';
   for(const q of popups){const a=clamp(1-q.t/1.6,0,1),x=clamp(q.x*scale,60*dpr,cv.width-60*dpr),y=(q.y-camY)*scale;
@@ -951,6 +1093,9 @@ function hud(t){
   const pr=clamp(m/GOAL,0,1)*100;$('railFill').style.width=pr+'%';$('railMark').style.left='calc('+pr+'% - 1px)';
   const ce=$('cover'),on=P.cover>.05;ce.hidden=!on;if(on)ce.textContent=tr('hide')+' '+Math.round(P.cover*100)+'%';
   $('scoreV').textContent=G.score;const cmb=1+Math.min(1.5,.25*G.combo);$('comboV').textContent=G.combo>0&&G.state==='play'?'\u00d7'+cmb.toFixed(2).replace(/0$/,''):'';
+  const tk=G.time<360?'tmr1':G.time<540?'tmr2':'tmr3',tl=G.time<360?360-G.time:G.time<540?540-G.time:0,tv=$('tmrV');
+  $('tmrL').textContent=tr(tk);tv.textContent=G.time<540?fmtTime(Math.ceil(tl)):'\u2014';
+  tv.style.color=G.time<300?'var(--ok)':G.time<360?'var(--amber)':'var(--alert)';
   $('det').classList.toggle('on',DET.on);$('detTxt').textContent=DET.on?tr('sig'):tr('quiet');
   drawDet(t);
   const fl=$('flash');fl.style.opacity=clamp(flashA+(P.hp<30&&G.state==='play'?.18+.1*Math.sin(t*6):0),0,1);
@@ -975,18 +1120,18 @@ function renderCard(kind){
      +'<div class="stats"><span>'+tr('tip')+'</span></div>'+(G.bs>0?'<div class="stats"><span>'+tr('bestLine',{n:G.bs})+'</span></div>':'')
      +(GP.on?'<div class="stats"><span>'+tr('padOn')+'</span></div>':'');
   }else if(kind==='dead'){
-    h=flag+'<h1>'+tr('dead')+'</h1><p>'+(G.cause?tr('cause',{c:tr(G.cause)})+' ':'')+tr('left',{n:Math.max(0,GOAL-Math.floor(meters()))})+' '+tr('lost')+'</p>'+stats+'<button class="btn" data-act="start" id="btnGo">'+tr('again')+'</button>';
+    h=flag+'<h1 class="bad">'+tr('dead')+'</h1><p>'+(G.cause?tr('cause',{c:tr(G.cause)})+' ':'')+tr('left',{n:Math.max(0,GOAL-Math.floor(meters()))})+' '+tr('lost')+'</p>'+stats+'<button class="btn" data-act="start" id="btnGo">'+tr('again')+'</button>';
   }else if(kind==='win'){
-    h=flag+'<h1>'+tr('won')+'</h1><p>'+tr('won2')+' '+tr('bonus',{n:G.bonus})+' '+tr('winp',{hp:Math.ceil(P.hp),a:P.tube+P.reserve})+'</p>'+stats+'<button class="btn" data-act="start" id="btnGo">'+tr('again2')+'</button>';
+    h=flag+'<h1 class="'+({A:'good',B:'',C:'late'}[G.end]||'good')+'">'+tr('won'+(G.end||'A'))+'</h1><p>'+tr('end'+(G.end||'A'))+' '+tr('bonus',{n:G.bonus})+' '+tr('winp',{hp:Math.ceil(P.hp),a:P.tube+P.reserve})+'</p>'+stats+'<button class="btn" data-act="start" id="btnGo">'+tr('again2')+'</button>';
   }else if(kind==='pause'){
     h=lang+flag+'<h1>'+tr('pause')+'</h1><p>'+tr('pausep')+'</p><button class="btn" data-act="resume" id="btnGo">'+tr('resume')+'</button>';
   }
-  card.className=kind==='menu'?'card menu':'card';card.dataset.kind=kind;card.innerHTML=h;sc.hidden=false;
+  sc.style.background=kind==='win'?'rgba(8,10,6,.5)':'';card.className=kind==='menu'?'card menu':'card';card.dataset.kind=kind;card.innerHTML=h;sc.hidden=false;
   const b=$('btnGo');if(b)setTimeout(()=>{try{b.focus({preventScroll:true})}catch(e){}},50);
 }
 $('card').addEventListener('click',e=>{const lg=e.target.closest('[data-lang]');if(lg){LANG=lg.dataset.lang;try{localStorage.setItem('dkm_lang',LANG)}catch(x){}applyLang();renderCard($('card').dataset.kind||'menu');return}const a=e.target.closest('[data-act]');if(!a)return;initAudio();if(a.dataset.act==='start')startGame();else togglePause()});
 function startGame(){
-  initAudio();newGame();G.state='play';$('screen').hidden=true;shellKey='';
+  initAudio();newGame();G.state='play';$('screen').hidden=true;shellKey='';document.body.classList.remove('fin');
   lastBiome=-1;updBiomeText();
 }
 function togglePause(){
@@ -1002,12 +1147,13 @@ function frame(ts){
   try{
     pollPad();
     if(G.state==='play')update(dt);
-    else if(G.state==='dead'||G.state==='win'){
-      for(const q of parts){q.life-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.94;q.vy*=.94}parts=parts.filter(q=>q.life>0);
+    else if(G.state==='finale'||G.state==='win')finaleStep(dt);
+    else if(G.state==='dead'){
+      stepParts(dt);
       for(const b of booms)b.t+=dt;booms=booms.filter(b=>b.t<b.dur);
       if(flashA>0)flashA=Math.max(0,flashA-dt*1.6);shake*=Math.exp(-8*dt);
     }
-    camY=P.y-VH*.62;
+    camY=P.y-VH*((G.state==='finale'||G.state==='win')?lerp(.62,.84,clamp(G.fT/3,0,1)):.62);
     render(ts/1000);hud(ts/1000);updateBuzz();
   }catch(err){console.error(err)}
 }
